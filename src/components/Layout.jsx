@@ -1,9 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Radio, FileText, BarChart3, History, Sparkles } from 'lucide-react';
+import { Radio, FileText, BarChart3, History, Sparkles, Video } from 'lucide-react';
 import TemaToggle from '@/components/TemaToggle';
 
 const links = [
   { to: '/', label: 'Reunión en vivo', icon: Radio },
+  { to: '/videollamada', label: 'Videollamada', icon: Video },
   { to: '/sesiones', label: 'Mis sesiones', icon: History },
   { to: '/propuesta', label: 'Propuesta', icon: FileText },
   { to: '/evaluacion', label: 'Evaluación', icon: BarChart3 },
@@ -21,7 +22,7 @@ export default function Layout() {
           </div>
           <div className="lg:hidden"><TemaToggle /></div>
         </div>
-        <nav className="flex gap-1 overflow-x-auto px-3 pb-2 lg:flex-1 lg:flex-col lg:overflow-visible lg:pb-3">
+        <nav className="flex gap-1 overflow-x-auto [scrollbar-width:none] px-3 pb-2 lg:flex-1 lg:flex-col lg:overflow-visible lg:pb-3">
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} end className={({ isActive }) => `flex items-center gap-3 whitespace-nowrap rounded-lg border-l-[3px] px-3 py-2 text-sm lg:py-2.5 lg:text-[15px] font-medium transition-colors ${isActive ? 'border-sidebar-primary bg-sidebar-accent text-sidebar-accent-foreground' : 'border-transparent text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'}`}>
               <Icon className="h-4 w-4" strokeWidth={1.75} />{label}

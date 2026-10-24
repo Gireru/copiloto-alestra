@@ -18,7 +18,7 @@ export default function useReunion(cat) {
 
   const nueva = async () => {
     const r = await base44.entities.Sesion.create({ inicio: new Date().toISOString(), inventadas_bloqueadas: 0 });
-    window.history.replaceState(null, '', '/');
+    window.history.replaceState(null, '', window.location.pathname);
     localStorage.setItem('sesionActual', r.id);
     ultimo.current = ''; setFalla(false);
     setSt({ ...vacia(), id: r.id, inicio: r.inicio });
