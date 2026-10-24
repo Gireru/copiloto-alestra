@@ -1,24 +1,22 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
-import { clasificar, checklist } from '../../shared/reglas.ts';
+import { clasificar, checklist, sugerirPaquete } from '../../shared/reglas.ts';
 
 const AVISO_DESC = 'Un descuento mayor al 10% requiere autorización del gerente.';
+const LLM_TIMEOUT_MS = 20000;
+const CACHE_MS = 5 * 60 * 1000;
+let cache = null; // { t, productos, paquetes }
 
-const PROMPT = `Eres el copiloto de un vendedor de Alestra. Usa SOLO el catálogo dado; nunca inventes SKUs, precios ni capacidades. Si preguntan algo fuera del catálogo responde: 'No está en el catálogo; lo confirmo con un arquitecto.' Nunca des precios.
-Salida:
-- productos_candidatos: SKUs cuya "s" (señal) coincide con lo que dice el cliente; motivo = cita textual del cliente.
-- preguntas_siguientes: máx 3, tomadas de "q" del producto, con sku_fuente; no repitas lo ya respondido.
+const PROMPT = `Eres el copiloto de un vendedor de Alestra. Usa SOLO el catálogo; nunca inventes SKUs ni precios. Si preguntan algo fuera del catálogo responde: 'No está en el catálogo; lo confirmo con un arquitecto.'
+- productos_candidatos: SKUs cuya señal "s" coincide con lo que dice el cliente; motivo = cita textual breve.
 - respuestas_sugeridas: máx 3 respuestas cortas sin precios, con sku_fuente.
-- paquete_sugerido: id PAQ-xx si todos sus productos aplican, si no "".
-- datos_extraidos: SOLO lo dicho explícitamente; omite lo demás. usuarios = número de personas que usarán el servicio dicho como cantidad; NUNCA uses 1 por mencionar a una persona ("una recepcionista") y no lo deduzcas de empleados. Si hablan de sucursales, usa sucursales (no usuarios). descuento_solicitado_pct si piden un % de descuento. plazo_meses si lo dicen. regulacion: CNBV, tarjeta, datos sensibles, salud… multinube: 2+ nubes o nube+data center propio. pide_diseno_formal: piden diseño de arquitectura o documento técnico.
-- pregunta_del_cliente: si lo último que dijo contiene una pregunta directa {texto, respuesta, sku_fuente}; si no, omite.
-- resumen_necesidad: 1-2 oraciones simples, sin precios ni productos.`;
+- datos_extraidos: SOLO lo dicho explícitamente. usuarios = cantidad de personas que usarán el servicio (nunca 1 por mencionar a una persona). sucursales si hablan de sucursales. descuento_solicitado_pct, plazo_meses si se dicen. regulacion: CNBV, tarjeta, datos sensibles, salud. multinube: 2+ nubes o nube+data center propio. integracion_sistemas: ERP/CRM/sistema propio. pide_diseno_formal: piden diseño o documento técnico.
+- pregunta_del_cliente: si lo último contiene una pregunta directa {texto, respuesta, sku_fuente}.
+- resumen_necesidad: 1-2 oraciones, sin precios.`;
 
 const SCHEMA = {
   type: 'object',
   properties: {
     productos_candidatos: { type: 'array', items: { type: 'object', properties: { sku: { type: 'string' }, motivo: { type: 'string' } } } },
-    paquete_sugerido: { type: 'string' },
-    preguntas_siguientes: { type: 'array', items: { type: 'object', properties: { pregunta: { type: 'string' }, sku_fuente: { type: 'string' } } } },
     respuestas_sugeridas: { type: 'array', items: { type: 'object', properties: { texto: { type: 'string' }, sku_fuente: { type: 'string' } } } },
     datos_extraidos: {
       type: 'object',
@@ -33,17 +31,29 @@ const SCHEMA = {
     pregunta_del_cliente: { type: 'object', properties: { texto: { type: 'string' }, respuesta: { type: 'string' }, sku_fuente: { type: 'string' } } },
     resumen_necesidad: { type: 'string' }
   },
-  required: ['productos_candidatos', 'preguntas_siguientes', 'respuestas_sugeridas', 'datos_extraidos']
+  required: ['productos_candidatos', 'datos_extraidos']
 };
 
-// Limpia datos: quita vacíos y usuarios inventados.
+const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const STOP = new Set(['tenemos', 'queremos', 'nuestro', 'nuestra', 'nuestros', 'porque', 'cuando', 'tambien', 'nosotros', 'empresa', 'nadie']);
+
+// Respaldo determinista: coincidencia de palabras de la señal del cliente.
+function porKeywords(texto, productos) {
+  const t = norm(texto);
+  return productos.map((p) => {
+    const pal = [...new Set(norm(p.senal_del_cliente).match(/[a-z0-9]{5,}/g) || [])].filter((w) => !STOP.has(w));
+    const hits = pal.filter((w) => t.includes(w));
+    return { sku: p.sku, hits: hits.length, motivo: `Coincide con: ${hits.join(', ')}` };
+  }).filter((x) => x.hits >= 2).sort((a, b) => b.hits - a.hits).slice(0, 5).map(({ sku, motivo }) => ({ sku, motivo }));
+}
+
 function limpiarDatos(raw, texto, empleados) {
   const d = Object.fromEntries(Object.entries(raw || {}).filter(([, v]) => v !== 0 && v !== '' && v !== false && v !== null && v !== undefined));
   if (d.usuarios != null) {
     const enTexto = new RegExp(`\\b${d.usuarios}\\b`).test(texto.replace(/[,.](?=\d{3})/g, ''));
-    if (d.usuarios <= 1 || (!enTexto && (d.usuarios === empleados || d.usuarios === d.sucursales))) delete d.usuarios;
+    if (d.usuarios <= 1 || (!enTexto && d.usuarios === d.sucursales)) delete d.usuarios;
   }
-  // Respaldo determinista para descuento solicitado.
+  if (d.usuarios == null && empleados) d.usuarios = empleados;
   if (d.descuento_solicitado_pct == null) {
     const m = texto.match(/(\d{1,2})\s?%[^.\n]{0,25}descuento|descuento[^.\n]{0,25}?(\d{1,2})\s?%/i);
     if (m) d.descuento_solicitado_pct = Number(m[1] || m[2]);
@@ -62,47 +72,67 @@ export default async function (req: Request): Promise<Response> {
     const hechas = Array.isArray(ya_preguntado) ? ya_preguntado.slice(0, 50).map((s) => String(s).slice(0, 300)) : [];
     const emp = typeof empleados === 'number' && empleados > 0 ? empleados : null;
     const conversacion = texto.slice(0, 8000);
+    const tiempos = {};
 
-    const [productos, paquetes] = await Promise.all([base44.entities.Producto.list('sku', 100), base44.entities.Paquete.list('id_paquete', 50)]);
+    // 1. Catálogo (cacheado en memoria)
+    let t = Date.now();
+    if (!cache || Date.now() - cache.t > CACHE_MS) {
+      const [productos, paquetes] = await Promise.all([base44.entities.Producto.list('sku', 100), base44.entities.Paquete.list('id_paquete', 50)]);
+      cache = { t: Date.now(), productos, paquetes };
+    }
+    const { productos, paquetes } = cache;
     const productosMap = Object.fromEntries(productos.map((p) => [p.sku, p]));
-    const cat = {
-      p: productos.filter((p) => !desc.has(p.sku)).map((p) => ({ sku: p.sku, n: p.nombre, s: p.senal_del_cliente, q: (p.preguntas_clave || []).slice(0, 2) })),
-      paq: paquetes.map((q) => ({ id: q.id_paquete, p: q.productos }))
-    };
-    const prompt = `${PROMPT}\n\nCATÁLOGO:${JSON.stringify(cat)}\n${emp ? `Empleados de la empresa (contexto, NO son usuarios): ${emp}\n` : ''}${hechas.length ? `Ya preguntado (no repetir): ${JSON.stringify(hechas)}\n` : ''}CONVERSACIÓN:\n"""${conversacion}"""`;
+    tiempos.catalogo_ms = Date.now() - t;
 
-    const t0 = Date.now();
-    const out = await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt, response_json_schema: SCHEMA, model: 'gemini_3_8_flash' });
-    const ms = Date.now() - t0;
+    // 2. Una sola llamada al LLM, con timeout de 20 s
+    const cat = productos.filter((p) => !desc.has(p.sku)).map((p) => ({ sku: p.sku, n: p.nombre, s: p.senal_del_cliente }));
+    const prompt = `${PROMPT}\n\nCATÁLOGO:${JSON.stringify(cat)}\n${emp ? `Empleados (contexto): ${emp}\n` : ''}CONVERSACIÓN:\n"""${conversacion}"""`;
+    t = Date.now();
+    let out = null;
+    let modo = 'ia';
+    try {
+      out = await Promise.race([
+        base44.asServiceRole.integrations.Core.InvokeLLM({ prompt, response_json_schema: SCHEMA, model: 'gemini_3_flash' }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), LLM_TIMEOUT_MS))
+      ]);
+    } catch (e) {
+      modo = 'determinista';
+      console.log('LLM falló o expiró:', e.message);
+      out = { productos_candidatos: porKeywords(conversacion, cat.map((c) => productosMap[c.sku])), datos_extraidos: {}, respuestas_sugeridas: [] };
+    }
+    tiempos.llm_ms = Date.now() - t;
 
-    const paqIds = new Set(paquetes.map((q) => q.id_paquete));
+    // 3. Validación y clasificación determinista
+    t = Date.now();
     let bloqueadas = 0;
-    const keep = (arr, key) => (arr || []).filter((x) => { const ok = !!productosMap[x?.[key]]; if (!ok) bloqueadas++; return ok; });
-    const productos_candidatos = keep(out.productos_candidatos, 'sku').filter((c) => !desc.has(c.sku));
-    const preguntas_siguientes = keep(out.preguntas_siguientes, 'sku_fuente').filter((p) => !hechas.includes(p.pregunta)).slice(0, 3);
+    const productos_candidatos = (out.productos_candidatos || []).filter((x) => { const ok = !!productosMap[x?.sku]; if (!ok) bloqueadas++; return ok; }).filter((c) => !desc.has(c.sku));
+    const skus = productos_candidatos.map((c) => c.sku);
+    const preguntas_siguientes = skus.flatMap((s) => (productosMap[s].preguntas_clave || []).map((pregunta) => ({ pregunta, sku_fuente: s })))
+      .filter((p) => !hechas.includes(p.pregunta)).slice(0, 3);
     let pregunta_cliente = out.pregunta_del_cliente?.texto && out.pregunta_del_cliente?.respuesta ? out.pregunta_del_cliente : null;
     if (pregunta_cliente && !pregunta_cliente.respuesta.startsWith('No está en el catálogo') && !productosMap[pregunta_cliente.sku_fuente]) { bloqueadas++; pregunta_cliente = null; }
     let respuestas_sugeridas = (out.respuestas_sugeridas || []).filter((r) => {
       if (r?.texto?.startsWith('No está en el catálogo')) return true;
       const ok = !!productosMap[r?.sku_fuente]; if (!ok) bloqueadas++; return ok;
     }).slice(0, 3);
-    let paquete_sugerido = out.paquete_sugerido || null;
-    if (paquete_sugerido && !paqIds.has(paquete_sugerido)) { bloqueadas++; paquete_sugerido = null; }
 
     const datos_extraidos = limpiarDatos(out.datos_extraidos, conversacion, emp);
     if (datos_extraidos.descuento_solicitado_pct > 10 && pregunta_cliente && /descuento/i.test(pregunta_cliente.texto)) pregunta_cliente = { ...pregunta_cliente, respuesta: AVISO_DESC, sku_fuente: '' };
     if (datos_extraidos.descuento_solicitado_pct > 10) respuestas_sugeridas = [{ texto: AVISO_DESC, sku_fuente: '' }, ...respuestas_sugeridas.filter((r) => r.texto !== AVISO_DESC)].slice(0, 3);
 
-    const skus = productos_candidatos.map((c) => c.sku);
-    const { reglas, tipo } = clasificar(datos_extraidos, skus, productosMap, conversacion);
+    const paq = sugerirPaquete(skus, paquetes, productosMap);
+    const { reglas, tipo } = clasificar(datos_extraidos, skus, productosMap, conversacion, emp);
     const lista = checklist(datos_extraidos, skus, productosMap);
+    tiempos.clasificacion_ms = Date.now() - t;
+    console.log('Tiempos copilotAnalyze', JSON.stringify({ ...tiempos, modo }));
 
-    if (sesion_id) await base44.entities.Sesion.update(String(sesion_id), { tipo_de_caso: tipo, reglas_disparadas: reglas });
+    if (sesion_id) base44.entities.Sesion.update(String(sesion_id), { tipo_de_caso: tipo, reglas_disparadas: reglas }).catch((e) => console.log('No se guardó la sesión:', e.message));
 
     return Response.json({
-      productos_candidatos, paquete_sugerido, preguntas_siguientes, respuestas_sugeridas, datos_extraidos, checklist: lista, pregunta_cliente,
+      productos_candidatos, paquete_sugerido: paq?.id || null, paquete_nombre: paq?.nombre || null, preguntas_siguientes, respuestas_sugeridas,
+      datos_extraidos, checklist: lista, pregunta_cliente,
       resumen_necesidad: String(out.resumen_necesidad || '').replace(/\$?\d[\d.,%]*/g, '').trim(),
-      tipo_de_caso: tipo, reglas_disparadas: reglas, bloqueadas, ms
+      tipo_de_caso: tipo, reglas_disparadas: reglas, bloqueadas, modo, tiempos, ms: tiempos.llm_ms
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

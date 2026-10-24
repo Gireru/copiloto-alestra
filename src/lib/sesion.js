@@ -48,7 +48,7 @@ export function derivar(st, productosMap) {
   const manuales = st.productos_manuales.filter((s) => !desc.has(s) && productosMap[s] && !ia.some((c) => c.sku === s)).map((sku) => ({ sku, motivo: 'Agregado por el vendedor' }));
   const productos = [...ia, ...manuales];
   const checklist = st.checklist_ia.map((c) => ({ ...c, cubierto: st.checklist_manual[c.dato] ?? c.cubierto }));
-  let { reglas, tipo } = evaluarReglas(datos, productos, productosMap, st.transcripcion);
+  let { reglas, tipo } = evaluarReglas(datos, productos, productosMap, st.transcripcion, st.empleados);
   if (datos.descuento_solicitado_pct > 10)
     reglas = [...reglas, { id: 'AUT-DESC', motivo: `el cliente pide ${datos.descuento_solicitado_pct}% de descuento (más del 10%)`, partes: ['autorización del gerente'] }];
   if (st.escalado_motivo) {

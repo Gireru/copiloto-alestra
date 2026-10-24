@@ -2,11 +2,12 @@
 const NUBES = ['AWS', 'AZ', 'OCI'];
 const TODAS = null; // afecta a todo el caso
 const MIGRACION = ['SIM-DC-09', 'SIM-AWS-05', 'SIM-AZ-04', 'SIM-OCI-03'];
-const LICENCIAS_M365 = ['SIM-M365-01', 'SIM-M365-02', 'SIM-M365-03', 'SIM-M365-04'];
 
 const n = (v) => (typeof v === 'number' && v > 0 ? v : null);
 
-export function evaluarReglas(datos = {}, candidatos = [], productosMap = {}, texto = '') {
+const A_LA_MEDIDA = ['ESC-01', 'ESC-02', 'ESC-08', 'ESC-09', 'ESC-10'];
+
+export function evaluarReglas(datos = {}, candidatos = [], productosMap = {}, texto = '', empleados = null) {
   const prods = candidatos.map((c) => productosMap[c.sku]).filter(Boolean);
   const fams = new Set(prods.map((p) => p.familia));
   const nubes = NUBES.filter((f) => fams.has(f));
@@ -18,9 +19,10 @@ export function evaluarReglas(datos = {}, candidatos = [], productosMap = {}, te
   const medida = prods.filter((p) => p.tipo === 'a la medida');
   if (medida.length) add('ESC-01', `producto a la medida (${medida.map((p) => p.nombre).join(', ')})`, (p) => p.tipo === 'a la medida');
 
-  const lic = LICENCIAS_M365.filter((s) => skus.has(s));
-  if ((n(datos.usuarios) > 300 && fams.has('M365')) || lic.length >= 2)
-    add('ESC-02', lic.length >= 2 ? 'licencias de Microsoft 365 mezcladas' : `${datos.usuarios} usuarios en Microsoft 365`, (p) => p.familia === 'M365');
+  const mezcla = /licencias\s+(de\s+varios\s+tipos|mezcladas|revueltas|distintas|diferentes)/i.test(texto);
+  const gente = n(datos.usuarios) > 300 ? datos.usuarios : n(empleados) > 300 ? empleados : null;
+  if ((gente && fams.has('M365')) || mezcla)
+    add('ESC-02', mezcla ? 'el cliente tiene licencias de varios tipos' : `${gente} usuarios en Microsoft 365`, (p) => p.familia === 'M365');
 
   const mig = n(datos.migracion_servidores) || (MIGRACION.some((s) => skus.has(s)) ? n(datos.servidores) : null);
   if (mig > 10) add('ESC-03', `migración de ${mig} servidores`, (p) => MIGRACION.includes(p.sku) || p.familia === 'DC');
@@ -31,9 +33,10 @@ export function evaluarReglas(datos = {}, candidatos = [], productosMap = {}, te
   if (/tarjeta|pci/i.test(reg)) motivosReg.push('pagos con tarjeta');
   if (/sensible/i.test(reg)) motivosReg.push('datos personales sensibles');
   if (/salud|cl[ií]nic/i.test(reg) && !motivosReg.includes('datos de salud')) motivosReg.push('datos de salud');
+  if (!motivosReg.length && /expediente(s)?\s+cl[ií]nico|hospital|pacientes/i.test(texto)) motivosReg.push('datos de salud');
   if (motivosReg.length) add('ESC-04', motivosReg.join(', '), TODAS);
 
-  if (datos.integracion_sistemas === true) add('ESC-05', 'integración con sistemas internos (ERP/CRM/propios)', (p) => ['IA', 'OCI', 'DC', 'AWS', 'AZ'].includes(p.familia));
+  if (datos.integracion_sistemas === true || /\bERP\b|\bCRM\b|sistema\s+(interno|propio)/i.test(texto)) add('ESC-05', 'integración con sistemas internos (ERP/CRM/propios)', (p) => ['IA', 'OCI', 'DC', 'AWS', 'AZ'].includes(p.familia));
 
   if (datos.multinube === true || nubes.length >= 2 || (nubes.length >= 1 && fams.has('DC')))
     add('ESC-06', nubes.length >= 2 ? 'combina dos o más nubes' : 'solución híbrida (nube + data center)', (p) => ['DC', 'BK', ...NUBES].includes(p.familia));
@@ -50,12 +53,7 @@ export function evaluarReglas(datos = {}, candidatos = [], productosMap = {}, te
   if (n(datos.presupuesto_mensual) > 250000) add('ESC-09', `presupuesto de $${datos.presupuesto_mensual.toLocaleString('es-MX')} MXN/mes`, TODAS);
   if (datos.pide_diseno_formal === true) add('ESC-10', 'el cliente pide un diseño o documento técnico formal', TODAS);
 
-  let tipo = 'estándar';
-  if (out.length) {
-    const afectado = (p) => out.some((r) => r.afecta === TODAS || r.afecta(p));
-    const libres = prods.filter((p) => !afectado(p));
-    tipo = libres.length ? 'mixto' : 'a la medida';
-  }
+  const tipo = !out.length ? 'estándar' : out.length === 1 && !A_LA_MEDIDA.includes(out[0].id) ? 'mixto' : 'a la medida';
   const reglas = out.map((r) => ({
     id: r.id,
     motivo: r.motivo,
