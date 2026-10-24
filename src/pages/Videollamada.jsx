@@ -6,7 +6,7 @@ import useReunion from '@/hooks/useReunion';
 import useSpeech from '@/hooks/useSpeech';
 import useCamara from '@/hooks/useCamara';
 import VideoStage from '@/components/video/VideoStage';
-import CopilotoLateral from '@/components/video/CopilotoLateral';
+import CopilotPanel from '@/components/meeting/CopilotPanel';
 import ResumenLlamada from '@/components/video/ResumenLlamada';
 
 export default function Videollamada() {
@@ -29,8 +29,9 @@ export default function Videollamada() {
         <Input value={r.st.cliente} onChange={(e) => r.set({ cliente: e.target.value })} placeholder="Nombre del cliente" className="h-10 max-w-xs" />
       </div>
       <div className="flex flex-col gap-4 lg:h-[calc(100vh-10rem)] lg:flex-row">
-        <VideoStage cam={cam} voz={voz} analizando={r.analizando} ultima={ultima} onColgar={colgar} />
-        <CopilotoLateral st={r.st} d={r.d} cat={cat} />
+        <VideoStage cam={cam} voz={voz} analizando={r.analizando} ultima={ultima} onColgar={colgar}>
+          <CopilotPanel r={r} cat={cat} falla={r.falla} analizando={r.analizando} />
+        </VideoStage>
       </div>
     </div>
   );
