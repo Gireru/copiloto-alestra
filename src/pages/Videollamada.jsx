@@ -6,6 +6,7 @@ import useReunion from '@/hooks/useReunion';
 import useSpeech from '@/hooks/useSpeech';
 import useCamara from '@/hooks/useCamara';
 import VideoStage from '@/components/video/VideoStage';
+import GuiaCatalogo from '@/components/video/GuiaCatalogo';
 import CopilotPanel from '@/components/meeting/CopilotPanel';
 import ResumenLlamada from '@/components/video/ResumenLlamada';
 
@@ -30,6 +31,7 @@ export default function Videollamada() {
       </div>
       <div className="flex flex-col gap-4 lg:h-[calc(100vh-10rem)] lg:flex-row">
         <VideoStage cam={cam} voz={voz} analizando={r.analizando} ultima={ultima} onColgar={colgar}>
+          <GuiaCatalogo r={r} cat={cat} />
           <CopilotPanel r={r} cat={cat} falla={r.falla} analizando={r.analizando} />
         </VideoStage>
       </div>
