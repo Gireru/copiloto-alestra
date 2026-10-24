@@ -21,7 +21,7 @@ export default function Layout() {
           </div>
           <div className="lg:hidden"><TemaToggle /></div>
         </div>
-        <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-1 lg:flex-col">
+        <nav className="flex flex-wrap gap-1 px-3 pb-3 lg:flex-1 lg:flex-col">
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} end className={({ isActive }) => `flex items-center gap-3 whitespace-nowrap rounded-lg border-l-[3px] px-3 py-2.5 text-[15px] font-medium transition-colors ${isActive ? 'border-sidebar-primary bg-sidebar-accent text-sidebar-accent-foreground' : 'border-transparent text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'}`}>
               <Icon className="h-4 w-4" strokeWidth={1.75} />{label}
