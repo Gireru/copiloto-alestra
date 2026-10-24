@@ -24,14 +24,14 @@ export default function Reunion() {
     <div className="space-y-5">
       <GuiaPrimerUso />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-extrabold tracking-tight">Reunión en vivo</h1>
+        <div><p className="eyebrow">Levantamiento · En vivo</p><h1 className="mt-1 text-4xl">Reunión en vivo</h1><div className="gradient-rule mt-3" /></div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={r.nueva} className="h-12 text-base"><RotateCcw className="mr-2 h-4 w-4" />Nueva reunión</Button>
           <Button variant="outline" onClick={() => window.open(`/cliente?sesion=${st.id}`, 'vistaCliente', 'width=1100,height=800')} className="h-12 text-base"><MonitorUp className="mr-2 h-4 w-4" />Mostrar al cliente</Button>
           <Button variant="secondary" onClick={r.analizar} disabled={r.analizando || !st.transcripcion.trim()} className="h-12 text-base"><Zap className="mr-2 h-4 w-4" />Analizar ahora</Button>
           <CierreDialog r={r} />
           <CotizacionPDF st={st} d={d} cat={cat} />
-          <Button onClick={generar} disabled={!st.confirmado || !d.productos.length} title={st.confirmado ? '' : 'Primero termina la reunión y confirma con el cliente'} className="h-12 text-base"><FileText className="mr-2 h-4 w-4" />Generar propuesta</Button>
+          <Button onClick={generar} disabled={!st.confirmado || !d.productos.length} title={st.confirmado ? '' : 'Primero termina la reunión y confirma con el cliente'} className="btn-gradient h-12 text-base hover:opacity-95"><FileText className="mr-2 h-4 w-4" />Generar propuesta</Button>
         </div>
       </div>
       <div className="grid gap-5 lg:grid-cols-[1fr_1.25fr_1fr]">
