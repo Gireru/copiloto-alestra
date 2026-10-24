@@ -37,7 +37,7 @@ export default function useReunion(cat) {
     if (enCurso.current) { pendiente.current = true; return; }
     clearTimeout(timer.current); timer.current = null; clearTimeout(reintento.current);
     enCurso.current = true; ultimo.current = texto; setAnalizando(true);
-    const lento = setTimeout(() => setFalla(true), LIMITE_IA);
+    const lento = setTimeout(() => setFalla(true), 25000); // solo si de verdad no responde
     try {
       const r = await analizarTexto(texto, { descartados: cur.descartados, ya_preguntado: cur.preguntas_hechas, empleados: cur.empleados ?? null, industria: cur.industria || null, sesion_id: cur.id });
       setFalla(false);
