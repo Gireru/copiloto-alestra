@@ -1,0 +1,53 @@
+{
+  "name": "Familia",
+  "type": "object",
+  "properties": {
+    "id_familia": {
+      "type": "string"
+    },
+    "nombre": {
+      "type": "string"
+    },
+    "descripcion": {
+      "type": "string"
+    },
+    "problemas_que_resuelve": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id_familia",
+    "nombre"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "Paquete",
+  "type": "object",
+  "properties": {
+    "id_paquete": {
+      "type": "string"
+    },
+    "nombre": {
+      "type": "string"
+    },
+    "para_quien": {
+      "type": "string"
+    },
+    "productos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "descuento_pct": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "id_paquete",
+    "nombre"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

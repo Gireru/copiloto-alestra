@@ -1,0 +1,128 @@
+{
+  "name": "Producto",
+  "type": "object",
+  "properties": {
+    "sku": {
+      "type": "string"
+    },
+    "familia": {
+      "type": "string"
+    },
+    "nombre": {
+      "type": "string"
+    },
+    "descripcion": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "est\u00e1ndar",
+        "configurable",
+        "a la medida"
+      ]
+    },
+    "segmento": {
+      "type": "string"
+    },
+    "unidad_cobro": {
+      "type": "string"
+    },
+    "precio_mensual_mxn": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "cargo_unico_mxn": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "cantidad_minima": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "cantidad_maxima": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "plazo_minimo_meses": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "nivel_servicio": {
+      "type": "string"
+    },
+    "tiempo_implementacion": {
+      "type": "string"
+    },
+    "requiere_alguno_de": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "se_recomienda_con": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "senal_del_cliente": {
+      "type": "string"
+    },
+    "preguntas_clave": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cuando_entra_arquitecto": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sku",
+    "nombre",
+    "tipo"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

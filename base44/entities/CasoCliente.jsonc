@@ -1,0 +1,64 @@
+{
+  "name": "CasoCliente",
+  "type": "object",
+  "properties": {
+    "id_caso": {
+      "type": "string"
+    },
+    "empresa": {
+      "type": "string"
+    },
+    "industria": {
+      "type": "string"
+    },
+    "ciudad": {
+      "type": "string"
+    },
+    "empleados": {
+      "type": "number"
+    },
+    "mensaje_inicial": {
+      "type": "string"
+    },
+    "informacion_que_falta": {
+      "type": "string"
+    },
+    "tipo_de_caso": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id_caso"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "ReglaEscalamiento",
+  "type": "object",
+  "properties": {
+    "id_regla": {
+      "type": "string"
+    },
+    "cuando_entra_un_arquitecto": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id_regla"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
