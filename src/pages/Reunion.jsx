@@ -8,6 +8,7 @@ import CopilotPanel from '@/components/meeting/CopilotPanel';
 import ControlPanel from '@/components/meeting/ControlPanel';
 import CierreDialog from '@/components/meeting/CierreDialog';
 import GuiaPrimerUso from '@/components/meeting/GuiaPrimerUso';
+import CotizacionPDF from '@/components/meeting/CotizacionPDF';
 
 export default function Reunion() {
   const { data: cat } = useCatalog();
@@ -29,6 +30,7 @@ export default function Reunion() {
           <Button variant="outline" onClick={() => window.open(`/cliente?sesion=${st.id}`, 'vistaCliente', 'width=1100,height=800')} className="h-12 text-base"><MonitorUp className="mr-2 h-4 w-4" />Mostrar al cliente</Button>
           <Button variant="secondary" onClick={r.analizar} disabled={r.analizando || !st.transcripcion.trim()} className="h-12 text-base"><Zap className="mr-2 h-4 w-4" />Analizar ahora</Button>
           <CierreDialog r={r} />
+          <CotizacionPDF st={st} d={d} cat={cat} />
           <Button onClick={generar} disabled={!st.confirmado || !d.productos.length} title={st.confirmado ? '' : 'Primero termina la reunión y confirma con el cliente'} className="h-12 text-base"><FileText className="mr-2 h-4 w-4" />Generar propuesta</Button>
         </div>
       </div>
