@@ -14,7 +14,11 @@ export default function GuiaCatalogo({ r, cat, correo }) {
   const marcar = (q) => r.set((p) => ({ preguntas_hechas: [...(p.preguntas_hechas || []), q] }));
   const agregar = (s) => r.set((p) => ({ productos_manuales: [...p.productos_manuales, s] }));
 
-  const completo = !!correo?.preguntas_clave?.length && correo.preguntas_clave.every((q) => hechas.has(q));
+  const noAplica = new Set(st.preguntas_no_aplica || []);
+  const sugeridas = (st.ia.preguntas_siguientes || []).map((p) => p.pregunta);
+  const completoCorreo = !!correo?.preguntas_clave?.length && correo.preguntas_clave.every((q) => hechas.has(q));
+  const completoCopiloto = sugeridas.length > 0 && sugeridas.every((q) => hechas.has(q) && !noAplica.has(q));
+  const completo = completoCorreo || completoCopiloto;
 
   return (
     <div className="space-y-4 border-b border-border p-4 text-foreground">

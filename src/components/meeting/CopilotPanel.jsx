@@ -18,7 +18,7 @@ export default function CopilotPanel({ r, cat, falla, analizando }) {
         <span className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground"><ShieldCheck className="h-3.5 w-3.5" />Inventadas bloqueadas: <b className="text-foreground">{st.inventadas_bloqueadas}</b></span>
       </div>}>
       {falla && <p className="mb-4 flex items-center gap-2 rounded-xl bg-warning/15 p-3 font-medium text-foreground"><WifiOff className="h-5 w-5 text-warning" />Copiloto no disponible, puedes seguir manualmente.</p>}
-      <PreguntaCard preguntas={preguntas} preguntaCliente={st.ia.pregunta_cliente} onHecha={marcar} onNoAplica={marcar}
+      <PreguntaCard preguntas={preguntas} preguntaCliente={st.ia.pregunta_cliente} onHecha={marcar} onNoAplica={(q) => { marcar(q); set((p) => ({ preguntas_no_aplica: [...(p.preguntas_no_aplica || []), q] })); }}
         onRespondida={() => set((p) => ({ ia: { ...p.ia, pregunta_cliente: null } }))} />
       <Tabs defaultValue={falla ? 'productos' : 'respuestas'} className="mt-5">
         <TabsList className="w-full"><TabsTrigger value="respuestas" className="flex-1">Respuestas</TabsTrigger><TabsTrigger value="productos" className="flex-1">Productos ({d.productos.length})</TabsTrigger><TabsTrigger value="paquete" className="flex-1">Paquete</TabsTrigger></TabsList>
