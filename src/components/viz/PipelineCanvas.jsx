@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 import { motion } from 'framer-motion';
 import { Mic, Brain, Database, ShieldAlert, Package, ListChecks, FileText, Check } from 'lucide-react';
 
@@ -21,7 +20,7 @@ export default function PipelineCanvas({ etapa, res, totalProductos }) {
         const hecho = etapa > i, activo = etapa === i;
         const Icon = hecho ? Check : x.icon;
         return (
-          <Fragment key={x.n}>
+          <div key={x.n} className="contents">
             {i > 0 && (
               <div className="relative mt-8 h-0.5 min-w-6 flex-1 overflow-hidden rounded-full bg-white/10">
                 <motion.div className="absolute inset-y-0 left-0 bg-gradient-to-r from-chart-3 to-primary" initial={false} animate={{ width: etapa >= i ? '100%' : '0%' }} transition={{ duration: 0.45 }} />
@@ -41,7 +40,7 @@ export default function PipelineCanvas({ etapa, res, totalProductos }) {
               <p className={`mt-2 text-xs font-semibold ${etapa >= i ? 'text-foreground' : 'text-sidebar-foreground/50'}`}>{x.n}</p>
               <p className="mt-0.5 min-h-4 font-mono text-[11px] text-chart-3">{etapa > i || etapa >= 7 ? x.sub : ''}</p>
             </div>
-          </Fragment>
+          </div>
         );
       })}
     </div>
