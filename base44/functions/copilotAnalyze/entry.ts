@@ -11,7 +11,7 @@ const PROMPT = `Eres el copiloto de un vendedor de Alestra. Usa SOLO el catálog
 - respuestas_sugeridas: máx 3 respuestas cortas sin precios, con sku_fuente.
 - datos_extraidos: SOLO lo dicho explícitamente. usuarios = cantidad de personas que usarán el servicio (nunca 1 por mencionar a una persona). sucursales si hablan de sucursales. descuento_solicitado_pct, plazo_meses si se dicen. regulacion: CNBV, tarjeta, datos sensibles, salud. multinube: 2+ nubes o nube+data center propio. integracion_sistemas: ERP/CRM/sistema propio. pide_diseno_formal: piden diseño o documento técnico.
 - pregunta_del_cliente: si lo último contiene una pregunta directa {texto, respuesta, sku_fuente}.
-- resumen_necesidad: 1-2 oraciones, sin precios.`;
+- resumen_necesidad: 1-2 oraciones, sin precios; incluye las cifras que dijo el cliente (TB, años, %, usuarios).`;
 
 const SCHEMA = {
   type: 'object',
@@ -66,7 +66,7 @@ export default async function (req: Request): Promise<Response> {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    const { texto, descartados, ya_preguntado, empleados, sesion_id } = await req.json();
+    const { texto, descartados, ya_preguntado, empleados, sesion_id, industria } = await req.json();
     if (!texto || typeof texto !== 'string' || !texto.trim()) return Response.json({ error: 'Falta texto' }, { status: 400 });
     const desc = new Set(Array.isArray(descartados) ? descartados.slice(0, 50).map(String) : []);
     const hechas = Array.isArray(ya_preguntado) ? ya_preguntado.slice(0, 50).map((s) => String(s).slice(0, 300)) : [];
@@ -117,6 +117,9 @@ export default async function (req: Request): Promise<Response> {
     }).slice(0, 3);
 
     const datos_extraidos = limpiarDatos(out.datos_extraidos, conversacion, emp);
+    if (typeof industria === 'string' && industria.trim()) datos_extraidos.industria = industria.trim().slice(0, 100);
+    if (/^no especificad/i.test(String(datos_extraidos.regulacion || ''))) delete datos_extraidos.regulacion;
+    if (/^no especificad/i.test(String(datos_extraidos.industria || ''))) delete datos_extraidos.industria;
     if (datos_extraidos.descuento_solicitado_pct > 10 && pregunta_cliente && /descuento/i.test(pregunta_cliente.texto)) pregunta_cliente = { ...pregunta_cliente, respuesta: AVISO_DESC, sku_fuente: '' };
     if (datos_extraidos.descuento_solicitado_pct > 10) respuestas_sugeridas = [{ texto: AVISO_DESC, sku_fuente: '' }, ...respuestas_sugeridas.filter((r) => r.texto !== AVISO_DESC)].slice(0, 3);
 
@@ -131,7 +134,7 @@ export default async function (req: Request): Promise<Response> {
     return Response.json({
       productos_candidatos, paquete_sugerido: paq?.id || null, paquete_nombre: paq?.nombre || null, preguntas_siguientes, respuestas_sugeridas,
       datos_extraidos, checklist: lista, pregunta_cliente,
-      resumen_necesidad: String(out.resumen_necesidad || '').replace(/\$?\d[\d.,%]*/g, '').trim(),
+      resumen_necesidad: String(out.resumen_necesidad || '').replace(/\$\s?\d[\d.,]*(\s?(MXN|pesos))?/gi, '').replace(/\s{2,}/g, ' ').trim(),
       tipo_de_caso: tipo, reglas_disparadas: reglas, bloqueadas, modo, tiempos, ms: tiempos.llm_ms
     });
   } catch (error) {
