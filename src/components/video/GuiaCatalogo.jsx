@@ -1,4 +1,4 @@
-import { HelpCircle, Plus } from 'lucide-react';
+import { HelpCircle, Plus, Check, Package } from 'lucide-react';
 
 const INICIO = ['¿Qué problema quieren resolver hoy?', '¿Cuántas sedes y empleados tienen?', '¿Qué servicios de TI usan actualmente?', '¿Tienen alguna fecha o presupuesto en mente?'];
 
@@ -14,22 +14,26 @@ export default function GuiaCatalogo({ r, cat }) {
   const agregar = (s) => r.set((p) => ({ productos_manuales: [...p.productos_manuales, s] }));
 
   return (
-    <div className="space-y-4 border-b bg-card p-4 text-foreground">
-      <div>
-        <p className="eyebrow mb-2 flex items-center gap-1.5"><HelpCircle className="h-3.5 w-3.5" />Preguntas clave</p>
-        <ul className="space-y-1.5">{preguntas.map((q) => (
-          <li key={q}><button onClick={() => marcar(q)} title="Marcar como hecha" className="w-full rounded-lg bg-muted px-3 py-2 text-left text-sm text-foreground hover:bg-accent">{q}</button></li>
-        ))}</ul>
-      </div>
-      {recs.length > 0 && <div>
-        <p className="eyebrow mb-2">Recomendado del catálogo</p>
-        <ul className="space-y-1.5">{recs.map((s) => (
-          <li key={s} className="flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm">
-            <span>{cat.productosMap[s].nombre}</span>
-            <button onClick={() => agregar(s)} title="Agregar" className="rounded-md p-1 text-primary hover:bg-accent"><Plus className="h-4 w-4" /></button>
+    <div className="space-y-4 border-b border-border p-4 text-foreground">
+      <section>
+        <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold"><HelpCircle className="h-4 w-4 text-primary" />Preguntas clave</h3>
+        <ol className="space-y-2">{preguntas.map((q, i) => (
+          <li key={q} className="flex items-start gap-2 rounded-lg border border-border bg-background p-2.5">
+            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">{i + 1}</span>
+            <p className="flex-1 text-sm leading-snug text-foreground">{q}</p>
+            <button onClick={() => marcar(q)} title="Ya la hice" className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-success"><Check className="h-4 w-4" /></button>
+          </li>
+        ))}</ol>
+      </section>
+      {recs.length > 0 && <section>
+        <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold"><Package className="h-4 w-4 text-primary" />Recomendado del catálogo</h3>
+        <ul className="space-y-2">{recs.map((s) => (
+          <li key={s} className="flex items-center gap-2 rounded-lg border border-border bg-background p-2.5">
+            <div className="flex-1"><p className="text-sm font-medium text-foreground">{cat.productosMap[s].nombre}</p><p className="font-mono text-xs text-muted-foreground">{s}</p></div>
+            <button onClick={() => agregar(s)} className="flex items-center gap-1 rounded-md bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground hover:bg-primary/90"><Plus className="h-3.5 w-3.5" />Agregar</button>
           </li>
         ))}</ul>
-      </div>}
+      </section>}
     </div>
   );
 }

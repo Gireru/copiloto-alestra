@@ -16,7 +16,7 @@ export default function VideoStage({ cam, voz, analizando, ultima, onColgar, chi
         {analizando ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />Copiloto analizando</> : <><span className={`h-2 w-2 rounded-full ${voz.escuchando ? 'bg-success' : 'bg-white/40'}`} />{voz.escuchando ? 'Copiloto escuchando' : 'Activa el micrófono'}</>}
       </div>
       {(voz.parcial || ultima) && <p className="absolute inset-x-4 bottom-24 mx-auto max-w-2xl rounded-xl bg-black/60 px-4 py-2 text-center text-base text-white">{voz.parcial || ultima}</p>}
-      <div className="absolute right-3 top-3 z-10 max-h-[calc(100%-7rem)] w-[min(400px,calc(100%-1.5rem))] overflow-y-auto rounded-xl bg-card/95 shadow-xl backdrop-blur">{children}</div>
+      <div className="absolute right-3 top-3 z-10 max-h-[calc(100%-7rem)] w-[min(400px,calc(100%-1.5rem))] overflow-y-auto rounded-xl bg-card text-card-foreground shadow-xl">{children}</div>
       <div className="absolute inset-x-0 bottom-4 flex justify-center gap-3">
         <Button size="icon" onClick={voz.alternar} disabled={!voz.soportado} className={`h-14 w-14 rounded-full ${voz.escuchando ? 'bg-white/20 hover:bg-white/30' : 'bg-destructive hover:bg-destructive/90'} text-white`} title="Micrófono">
           {voz.escuchando ? <Mic className="!h-5 !w-5" /> : <MicOff className="!h-5 !w-5" />}
