@@ -1,12 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Radio, FileText, BarChart3, History } from 'lucide-react';
+import { Radio, FileText, BarChart3, History, Sparkles } from 'lucide-react';
 import TemaToggle from '@/components/TemaToggle';
 
 const links = [
   { to: '/', label: 'Reunión en vivo', icon: Radio },
   { to: '/sesiones', label: 'Mis sesiones', icon: History },
   { to: '/propuesta', label: 'Propuesta', icon: FileText },
-  { to: '/evaluacion', label: 'Evaluación', icon: BarChart3 }
+  { to: '/evaluacion', label: 'Evaluación', icon: BarChart3 },
+  { to: '/visualizador', label: 'Visualizador IA', icon: Sparkles }
 ];
 
 export default function Layout() {
