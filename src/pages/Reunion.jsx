@@ -5,7 +5,6 @@ import { useCatalog } from '@/lib/catalog';
 import useReunion from '@/hooks/useReunion';
 import ConversationPanel from '@/components/meeting/ConversationPanel';
 import CopilotPanel from '@/components/meeting/CopilotPanel';
-import ControlPanel from '@/components/meeting/ControlPanel';
 import CierreDialog from '@/components/meeting/CierreDialog';
 import GuiaPrimerUso from '@/components/meeting/GuiaPrimerUso';
 import CotizacionPDF from '@/components/meeting/CotizacionPDF';
@@ -35,12 +34,11 @@ export default function Reunion() {
           <Button onClick={generar} disabled={!st.confirmado || !d.productos.length} title={st.confirmado ? '' : 'Primero termina la reunión y confirma con el cliente'} className="btn-gradient h-12 text-base hover:opacity-95"><FileText className="mr-2 h-4 w-4" />Generar propuesta</Button>
         </div>
       </div>
-      <div className="grid gap-5 lg:grid-cols-[1fr_1.25fr_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_1.25fr]">
         <ConversationPanel transcript={st.transcripcion} cliente={st.cliente} setCliente={(v) => set({ cliente: v })} casos={cat.casos}
           onAppend={r.append} onFrase={r.frase} onReplace={(v) => set({ transcripcion: v })}
           onCargarCaso={(c) => set({ cliente: c.empresa, industria: c.industria, empleados: c.empleados, transcripcion: c.mensaje_inicial })} />
         <CopilotPanel r={r} cat={cat} falla={r.falla} analizando={r.analizando} />
-        <ControlPanel r={r} textos={cat.reglasTexto} />
       </div>
       <PropuestaPanel st={st} d={d} cat={cat} />
     </div>
