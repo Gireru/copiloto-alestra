@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { base44 } from '@/api/base44Client';
+import { transcribirArchivo } from '@/lib/transcribir';
 
 export default function SubirAudio({ onTexto }) {
   const input = useRef(null);
@@ -11,10 +11,9 @@ export default function SubirAudio({ onTexto }) {
     if (file.size > 25 * 1024 * 1024) { setEstado({ error: 'El audio debe pesar menos de 25 MB.' }); return; }
     setEstado({ cargando: true });
     try {
-      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
-      const { data } = await base44.functions.invoke('transcribirAudio', { audio_url: file_url });
-      if (data.texto) onTexto(data.texto);
-      setEstado(data.texto ? null : { error: 'No se detectó voz en el audio.' });
+      const texto = await transcribirArchivo(file);
+      if (texto) onTexto(texto);
+      setEstado(texto ? null : { error: 'No se detectó voz en el audio.' });
     } catch {
       setEstado({ error: 'No se pudo transcribir el audio.' });
     }

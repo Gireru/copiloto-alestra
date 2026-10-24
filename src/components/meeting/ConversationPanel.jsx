@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import useSpeech from '@/hooks/useSpeech';
 import Panel from './Panel';
 import SubirAudio from './SubirAudio';
+import GrabarAudio from './GrabarAudio';
 
 export default function ConversationPanel({ transcript, onAppend, onFrase, onReplace, casos, onCargarCaso, cliente, setCliente }) {
   const [texto, setTexto] = useState('');
@@ -24,6 +25,7 @@ export default function ConversationPanel({ transcript, onAppend, onFrase, onRep
         <Button onClick={voz.alternar} disabled={!voz.soportado} variant={voz.escuchando ? 'destructive' : 'default'} className="h-14 w-full text-lg">
           {voz.escuchando ? <><MicOff className="mr-2 h-5 w-5" />Detener micrófono</> : <><Mic className="mr-2 h-5 w-5" />{voz.soportado ? 'Escuchar al cliente' : 'Micrófono no disponible'}</>}
         </Button>
+        <GrabarAudio onTexto={onFrase} />
         <SubirAudio onTexto={onFrase} />
         {voz.escuchando && <p className="flex items-center gap-2 text-sm text-destructive"><span className="h-2 w-2 animate-pulse rounded-full bg-destructive" />Escuchando… {voz.parcial}</p>}
         <Textarea value={transcript} onChange={(e) => onReplace(e.target.value)} placeholder="Aquí aparece lo que dice el cliente…" className="min-h-[260px] text-lg leading-relaxed" />
