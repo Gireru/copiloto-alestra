@@ -3,6 +3,7 @@ import { Circle, Square, Loader2, FileAudio, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import useGrabadora from '@/hooks/useGrabadora';
 import { transcribirArchivo } from '@/lib/transcribir';
+import aWav from '@/lib/aWav';
 import IndicadorGrabando, { mmss } from './IndicadorGrabando';
 
 const PASOS = { subiendo: 'Guardando audio…', transcribiendo: 'Transcribiendo…' };
@@ -13,16 +14,19 @@ export default function GrabarAudio({ onTexto }) {
 
   const transcribir = async () => {
     const { blob, mime } = g.grabacion;
-    const ext = mime.includes('mp4') ? 'm4a' : 'webm';
-    const file = new File([blob], `reunion-${Date.now()}.${ext}`, { type: mime.split(';')[0] });
     g.setError(null);
     let actual = 'subiendo';
     try {
+      setPaso('subiendo');
+      const wav = await aWav(blob).catch(() => null);
+      const file = wav && wav.size < 25 * 1024 * 1024
+        ? new File([wav], `reunion-${Date.now()}.wav`, { type: 'audio/wav' })
+        : new File([blob], `reunion-${Date.now()}.${mime.includes('mp4') ? 'm4a' : 'webm'}`, { type: mime.split(';')[0] });
       const texto = await transcribirArchivo(file, (p) => { actual = p; setPaso(p); });
       if (!texto) { g.setError('No se detectó voz en la grabación.'); return; }
       onTexto(texto); g.descartar();
     } catch (e) {
-      g.setError(`No se pudo ${actual === 'subiendo' ? 'guardar' : 'transcribir'} el audio: ${e?.message || 'error desconocido'}.`);
+      g.setError(`No se pudo ${actual === 'subiendo' ? 'guardar' : 'transcribir'} el audio: ${e?.response?.data?.error || e?.message || 'error desconocido'}.`);
     } finally { setPaso(null); }
   };
 
