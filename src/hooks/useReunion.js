@@ -11,7 +11,7 @@ export default function useReunion(cat) {
   const [analizando, setAnalizando] = useState(false);
   const [falla, setFalla] = useState(false);
   const ref = useRef(st); ref.current = st;
-  const enCurso = useRef(false), pendiente = useRef(false), ultimo = useRef(''), timer = useRef(null), porFrase = useRef(false);
+  const enCurso = useRef(false), pendiente = useRef(false), ultimo = useRef(''), timer = useRef(null), reintento = useRef(null), porFrase = useRef(false);
 
   const d = useMemo(() => (st && cat ? derivar(st, cat.productosMap) : null), [st, cat]);
   const set = (patch) => setSt((p) => ({ ...p, ...(typeof patch === 'function' ? patch(p) : patch) }));
@@ -35,7 +35,7 @@ export default function useReunion(cat) {
     const cur = ref.current; const texto = cur?.transcripcion.trim();
     if (!texto || (!forzar && texto === ultimo.current)) return;
     if (enCurso.current) { pendiente.current = true; return; }
-    clearTimeout(timer.current); timer.current = null;
+    clearTimeout(timer.current); timer.current = null; clearTimeout(reintento.current);
     enCurso.current = true; ultimo.current = texto; setAnalizando(true);
     const lento = setTimeout(() => setFalla(true), LIMITE_IA);
     try {
@@ -49,6 +49,7 @@ export default function useReunion(cat) {
       }));
     } catch {
       setFalla(true); ultimo.current = '';
+      reintento.current = setTimeout(() => analizar(true), 5000); // reintenta solo
     } finally {
       clearTimeout(lento); enCurso.current = false; setAnalizando(false);
       if (pendiente.current) { pendiente.current = false; analizar(); }

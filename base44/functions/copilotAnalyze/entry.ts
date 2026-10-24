@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { clasificar, checklist, sugerirPaquete } from '../../shared/reglas.ts';
 
 const AVISO_DESC = 'Un descuento mayor al 10% requiere autorización del gerente.';
-const LLM_TIMEOUT_MS = 20000;
+const LLM_TIMEOUT_MS = 8000;
 const CACHE_MS = 5 * 60 * 1000;
 let cache = null; // { t, productos, paquetes }
 
