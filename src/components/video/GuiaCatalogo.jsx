@@ -1,4 +1,5 @@
 import { HelpCircle, Plus, Check, Package } from 'lucide-react';
+import MatchPerfecto from '@/components/video/MatchPerfecto';
 
 const INICIO = ['¿Qué problema quieren resolver hoy?', '¿Cuántas sedes y empleados tienen?', '¿Qué servicios de TI usan actualmente?', '¿Tienen alguna fecha o presupuesto en mente?'];
 
@@ -13,8 +14,11 @@ export default function GuiaCatalogo({ r, cat, correo }) {
   const marcar = (q) => r.set((p) => ({ preguntas_hechas: [...(p.preguntas_hechas || []), q] }));
   const agregar = (s) => r.set((p) => ({ productos_manuales: [...p.productos_manuales, s] }));
 
+  const completo = !!correo?.preguntas_clave?.length && correo.preguntas_clave.every((q) => hechas.has(q));
+
   return (
     <div className="space-y-4 border-b border-border p-4 text-foreground">
+      <MatchPerfecto activo={completo} r={r} />
       {correo && <p className="rounded-lg bg-accent p-2.5 text-xs text-accent-foreground"><b>Correo de {correo.empresa}:</b> {correo.asunto}</p>}
       <section>
         <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold"><HelpCircle className="h-4 w-4 text-primary" />Preguntas clave</h3>
