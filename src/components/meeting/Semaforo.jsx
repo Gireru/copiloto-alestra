@@ -7,10 +7,14 @@ const ESTADOS = {
 };
 const LUCES = ['bg-destructive', 'bg-warning', 'bg-success'];
 
-export default function Semaforo({ tipo, reglas }) {
+const BADGE = { 'estándar': ['Estándar', 'bg-success/15 text-success'], mixto: ['Mixto', 'bg-warning/15 text-warning-foreground'], 'a la medida': ['A la medida', 'bg-destructive/15 text-destructive'] };
+
+export default function Semaforo({ tipo, reglas, textos = {} }) {
+  const [bLabel, bClase] = BADGE[tipo] || BADGE['estándar'];
   const e = ESTADOS[tipo] || ESTADOS['estándar'];
   return (
     <div>
+      <span className={`mb-3 inline-block rounded-full px-3 py-1 text-sm font-semibold ${bClase}`}>Tipo de caso: {bLabel}</span>
       <div className="flex items-center gap-4">
         <div className="flex flex-col gap-2 rounded-2xl bg-foreground p-2.5">
           {LUCES.map((c, i) => (
@@ -26,6 +30,7 @@ export default function Semaforo({ tipo, reglas }) {
           {reglas.map((r) => (
             <motion.li key={r.id} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="rounded-lg border-l-4 border-warning bg-muted p-3 text-base">
               <b>{r.id}: {r.motivo}</b> → el arquitecto entra solo para esta parte{r.partes.length ? `: ${r.partes.join(', ')}` : ''}
+              {textos[r.id] && <p className="mt-1 text-sm text-muted-foreground">{textos[r.id]}</p>}
             </motion.li>
           ))}
         </AnimatePresence>

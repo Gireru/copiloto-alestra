@@ -7,10 +7,10 @@ export function useCatalog() {
     staleTime: Infinity,
     queryFn: async () => {
       const E = base44.entities;
-      const [productos, paquetes, casos, condiciones] = await Promise.all([
-        E.Producto.list('sku', 100), E.Paquete.list('id_paquete', 50), E.CasoCliente.list('id_caso', 50), E.CondicionComercial.list('created_date', 50)
+      const [productos, paquetes, casos, condiciones, reglas] = await Promise.all([
+        E.Producto.list('sku', 100), E.Paquete.list('id_paquete', 50), E.CasoCliente.list('id_caso', 50), E.CondicionComercial.list('created_date', 50), E.ReglaEscalamiento.list('id_regla', 20)
       ]);
-      return { productos, paquetes, casos, condiciones, productosMap: Object.fromEntries(productos.map((p) => [p.sku, p])) };
+      return { productos, paquetes, casos, condiciones, reglasTexto: Object.fromEntries(reglas.map((x) => [x.id_regla, x.cuando_entra_un_arquitecto])), productosMap: Object.fromEntries(productos.map((p) => [p.sku, p])) };
     }
   });
 }

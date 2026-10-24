@@ -3,6 +3,7 @@ import { evaluarReglas } from '@/lib/rules';
 
 export const DATOS_DEF = [
   { key: 'usuarios', label: 'Usuarios', tipo: 'number' },
+  { key: 'sucursales', label: 'Sucursales', tipo: 'number' },
   { key: 'servidores', label: 'Servidores', tipo: 'number' },
   { key: 'migracion_servidores', label: 'Servidores a migrar', tipo: 'number' },
   { key: 'tb', label: 'TB', tipo: 'number' },
@@ -17,7 +18,9 @@ export const DATOS_DEF = [
   { key: 'disponibilidad_pct', label: 'Disponibilidad %', tipo: 'number' },
   { key: 'oracle_tb', label: 'Oracle TB', tipo: 'number' },
   { key: 'oracle_rac_dataguard', label: 'Oracle RAC / Data Guard', tipo: 'bool' },
-  { key: 'pide_diseno_formal', label: 'Pide diseño formal', tipo: 'bool' }
+  { key: 'pide_diseno_formal', label: 'Pide diseño formal', tipo: 'bool' },
+  { key: 'descuento_solicitado_pct', label: 'Descuento pedido %', tipo: 'number' },
+  { key: 'plazo_meses', label: 'Plazo (meses)', tipo: 'number' }
 ];
 
 export const vacia = () => ({
@@ -46,6 +49,8 @@ export function derivar(st, productosMap) {
   const productos = [...ia, ...manuales];
   const checklist = st.checklist_ia.map((c) => ({ ...c, cubierto: st.checklist_manual[c.dato] ?? c.cubierto }));
   let { reglas, tipo } = evaluarReglas(datos, productos, productosMap, st.transcripcion);
+  if (datos.descuento_solicitado_pct > 10)
+    reglas = [...reglas, { id: 'AUT-DESC', motivo: `el cliente pide ${datos.descuento_solicitado_pct}% de descuento (más del 10%)`, partes: ['autorización del gerente'] }];
   if (st.escalado_motivo) {
     reglas = [...reglas, { id: 'MANUAL', motivo: st.escalado_motivo, partes: ['escalado por el vendedor'] }];
     if (tipo === 'estándar') tipo = 'mixto';

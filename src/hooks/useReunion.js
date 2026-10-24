@@ -39,7 +39,7 @@ export default function useReunion(cat) {
     enCurso.current = true; ultimo.current = texto; setAnalizando(true);
     const lento = setTimeout(() => setFalla(true), LIMITE_IA);
     try {
-      const r = await analizarTexto(texto, { descartados: cur.descartados, ya_preguntado: cur.preguntas_hechas });
+      const r = await analizarTexto(texto, { descartados: cur.descartados, ya_preguntado: cur.preguntas_hechas, empleados: cur.empleados ?? null, sesion_id: cur.id });
       setFalla(false);
       setSt((p) => ({
         ...p,

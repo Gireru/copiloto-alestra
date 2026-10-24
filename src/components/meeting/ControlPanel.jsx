@@ -15,13 +15,13 @@ function Cronometro({ inicio }) {
 
 const Titulo = ({ children }) => <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-muted-foreground">{children}</h3>;
 
-export default function ControlPanel({ r }) {
+export default function ControlPanel({ r, textos }) {
   const { st, d, set } = r;
   return (
     <Panel title="Control" icon={Gauge}>
       <div className="space-y-6">
         <div className="rounded-xl bg-accent p-3 text-center"><p className="text-sm font-medium text-accent-foreground">Tiempo de reunión</p><Cronometro inicio={st.inicio} /></div>
-        <Semaforo tipo={d.tipo} reglas={d.reglas} />
+        <Semaforo tipo={d.tipo} reglas={d.reglas} textos={textos} />
         <EscalarDialog motivo={st.escalado_motivo} onCambiar={(m) => set({ escalado_motivo: m })} />
         <div><Titulo>Datos del cliente</Titulo>
           <DatosChips datos={d.datos} manuales={st.datos_manuales} onCambiar={(k, v) => set((p) => ({ datos_manuales: { ...p.datos_manuales, [k]: v } }))} />

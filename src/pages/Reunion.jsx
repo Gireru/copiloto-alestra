@@ -9,6 +9,7 @@ import ControlPanel from '@/components/meeting/ControlPanel';
 import CierreDialog from '@/components/meeting/CierreDialog';
 import GuiaPrimerUso from '@/components/meeting/GuiaPrimerUso';
 import CotizacionPDF from '@/components/meeting/CotizacionPDF';
+import PropuestaPanel from '@/components/meeting/PropuestaPanel';
 
 export default function Reunion() {
   const { data: cat } = useCatalog();
@@ -39,8 +40,9 @@ export default function Reunion() {
           onAppend={r.append} onFrase={r.frase} onReplace={(v) => set({ transcripcion: v })}
           onCargarCaso={(c) => set({ cliente: c.empresa, industria: c.industria, empleados: c.empleados, transcripcion: c.mensaje_inicial })} />
         <CopilotPanel r={r} cat={cat} falla={r.falla} analizando={r.analizando} />
-        <ControlPanel r={r} />
+        <ControlPanel r={r} textos={cat.reglasTexto} />
       </div>
+      <PropuestaPanel st={st} d={d} cat={cat} />
     </div>
   );
 }

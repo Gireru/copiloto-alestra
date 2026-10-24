@@ -14,10 +14,28 @@
     "plazo_meses": {
       "type": "number"
     },
+    "paquete": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "subtotal_mensual": {
       "type": "number"
     },
     "descuentos": {
+      "type": "number"
+    },
+    "desglose_descuentos": {
+      "type": "object"
+    },
+    "descuento_total_pct": {
+      "type": "number"
+    },
+    "descuento_extra_pct": {
+      "type": "number"
+    },
+    "subtotal_con_descuento": {
       "type": "number"
     },
     "iva": {
@@ -29,8 +47,28 @@
     "cargos_unicos": {
       "type": "number"
     },
+    "cargos_unicos_total": {
+      "type": "number"
+    },
+    "nota_cargos_unicos": {
+      "type": "string"
+    },
     "requiere_autorizacion": {
       "type": "boolean"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "lista",
+        "pendiente_autorizacion",
+        "autorizada"
+      ]
+    },
+    "mensajes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "vigencia": {
       "type": "string",
@@ -46,7 +84,10 @@
       "type": "string"
     },
     "catalogo_fecha": {
-      "type": "string",
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "date-time"
     }
   },
