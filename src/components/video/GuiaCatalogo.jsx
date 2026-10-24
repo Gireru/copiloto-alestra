@@ -2,19 +2,20 @@ import { HelpCircle, Plus, Check, Package } from 'lucide-react';
 
 const INICIO = ['¿Qué problema quieren resolver hoy?', '¿Cuántas sedes y empleados tienen?', '¿Qué servicios de TI usan actualmente?', '¿Tienen alguna fecha o presupuesto en mente?'];
 
-export default function GuiaCatalogo({ r, cat }) {
+export default function GuiaCatalogo({ r, cat, correo }) {
   const { st, d } = r;
   const hechas = new Set(st.preguntas_hechas || []);
   const skus = new Set(d.productos.map((p) => p.sku));
-  const clave = [...new Set(d.productos.flatMap((p) => cat.productosMap[p.sku]?.preguntas_clave || []))];
+  const clave = [...new Set([...(correo?.preguntas_clave || []), ...d.productos.flatMap((p) => cat.productosMap[p.sku]?.preguntas_clave || [])])];
   const preguntas = (clave.length ? clave : INICIO).filter((q) => !hechas.has(q)).slice(0, 5);
-  const recs = [...new Set(d.productos.flatMap((p) => cat.productosMap[p.sku]?.se_recomienda_con || []))]
+  const recs = [...new Set([...(correo?.skus_relacionados || []), ...d.productos.flatMap((p) => cat.productosMap[p.sku]?.se_recomienda_con || [])])]
     .filter((s) => !skus.has(s) && cat.productosMap[s]).slice(0, 4);
   const marcar = (q) => r.set((p) => ({ preguntas_hechas: [...(p.preguntas_hechas || []), q] }));
   const agregar = (s) => r.set((p) => ({ productos_manuales: [...p.productos_manuales, s] }));
 
   return (
     <div className="space-y-4 border-b border-border p-4 text-foreground">
+      {correo && <p className="rounded-lg bg-accent p-2.5 text-xs text-accent-foreground"><b>Correo de {correo.empresa}:</b> {correo.asunto}</p>}
       <section>
         <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold"><HelpCircle className="h-4 w-4 text-primary" />Preguntas clave</h3>
         <ol className="space-y-2">{preguntas.map((q, i) => (

@@ -18,6 +18,7 @@ import MisSesiones from '@/pages/MisSesiones';
 import ClienteVista from '@/pages/ClienteVista';
 import Visualizador from '@/pages/Visualizador';
 import Videollamada from '@/pages/Videollamada';
+import Correos from '@/pages/Correos';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -57,6 +58,7 @@ const AuthenticatedApp = () => {
         <Route path="/sesiones" element={<MisSesiones />} />
         <Route path="/visualizador" element={<Visualizador />} />
         <Route path="/videollamada" element={<Videollamada />} />
+        <Route path="/correos" element={<Correos />} />
       </Route>
       <Route path="/cliente" element={<ClienteVista />} />
       <Route path="*" element={<PageNotFound />} />

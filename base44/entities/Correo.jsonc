@@ -1,0 +1,78 @@
+{
+  "name": "Correo",
+  "type": "object",
+  "properties": {
+    "remitente": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "empresa": {
+      "type": "string"
+    },
+    "industria": {
+      "type": "string"
+    },
+    "empleados": {
+      "type": "number"
+    },
+    "asunto": {
+      "type": "string"
+    },
+    "cuerpo": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "preguntas_clave": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "skus_relacionados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "asunto",
+    "cuerpo"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

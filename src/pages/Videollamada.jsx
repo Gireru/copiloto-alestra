@@ -6,6 +6,7 @@ import useReunion from '@/hooks/useReunion';
 import useSpeech from '@/hooks/useSpeech';
 import useCamara from '@/hooks/useCamara';
 import VideoStage from '@/components/video/VideoStage';
+import useCorreoLlamada from '@/hooks/useCorreoLlamada';
 import GuiaCatalogo from '@/components/video/GuiaCatalogo';
 import CopilotPanel from '@/components/meeting/CopilotPanel';
 import ResumenLlamada from '@/components/video/ResumenLlamada';
@@ -16,6 +17,7 @@ export default function Videollamada() {
   const [fin, setFin] = useState(false);
   const voz = useSpeech((t) => r.frase(t));
   const cam = useCamara();
+  const correo = useCorreoLlamada(r);
 
   if (!cat || !r.st || !r.d) return <div className="grid h-[60vh] place-items-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
@@ -31,7 +33,7 @@ export default function Videollamada() {
       </div>
       <div className="flex flex-col gap-4 lg:h-[calc(100vh-10rem)] lg:flex-row">
         <VideoStage cam={cam} voz={voz} analizando={r.analizando} ultima={ultima} onColgar={colgar}>
-          <GuiaCatalogo r={r} cat={cat} />
+          <GuiaCatalogo r={r} cat={cat} correo={correo} />
           <CopilotPanel r={r} cat={cat} falla={r.falla} analizando={r.analizando} />
         </VideoStage>
       </div>
