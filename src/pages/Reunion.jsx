@@ -24,8 +24,8 @@ export default function Reunion() {
     <div className="space-y-5">
       <GuiaPrimerUso />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><p className="eyebrow">Levantamiento · En vivo</p><h1 className="mt-1 text-4xl">Reunión en vivo</h1><div className="gradient-rule mt-3" /></div>
-        <div className="flex flex-wrap gap-2">
+        <div><p className="eyebrow">Levantamiento · En vivo</p><h1 className="mt-1 text-3xl md:text-4xl">Reunión en vivo</h1><div className="gradient-rule mt-3" /></div>
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap [&>button]:px-2 [&>button]:text-sm sm:[&>button]:px-4 sm:[&>button]:text-base [&>button:last-child]:col-span-2">
           <Button variant="outline" onClick={r.nueva} className="h-12 text-base"><RotateCcw className="mr-2 h-4 w-4" />Nueva reunión</Button>
           <Button variant="outline" onClick={() => window.open(`/cliente?sesion=${st.id}`, 'vistaCliente', 'width=1100,height=800')} className="h-12 text-base"><MonitorUp className="mr-2 h-4 w-4" />Mostrar al cliente</Button>
           <Button variant="secondary" onClick={r.analizar} disabled={r.analizando || !st.transcripcion.trim()} className="h-12 text-base"><Zap className="mr-2 h-4 w-4" />Analizar ahora</Button>
