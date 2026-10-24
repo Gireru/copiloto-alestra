@@ -7,9 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import useSpeech from '@/hooks/useSpeech';
 import Panel from './Panel';
 
-export default function ConversationPanel({ transcript, onAppend, onReplace, casos, onCargarCaso, cliente, setCliente }) {
+export default function ConversationPanel({ transcript, onAppend, onFrase, onReplace, casos, onCargarCaso, cliente, setCliente }) {
   const [texto, setTexto] = useState('');
-  const voz = useSpeech((t) => onAppend(t));
+  const voz = useSpeech((t) => onFrase(t));
   const enviar = () => { if (texto.trim()) { onAppend(texto.trim()); setTexto(''); } };
 
   return (

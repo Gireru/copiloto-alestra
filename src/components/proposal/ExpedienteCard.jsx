@@ -3,10 +3,12 @@ import { Briefcase, Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { expedientePDF } from '@/lib/pdf';
+import EnviarArquitecto from './EnviarArquitecto';
 
 export default function ExpedienteCard({ sesion, productosMap, expediente, setExpediente }) {
   const [cargando, setCargando] = useState(false);
   const reglas = sesion.reglas_disparadas || [];
+  const datosPDF = { cliente: sesion.cliente, expediente, reglas, transcripcion: sesion.transcripcion };
   const generar = async () => {
     setCargando(true);
     try {
@@ -31,8 +33,9 @@ export default function ExpedienteCard({ sesion, productosMap, expediente, setEx
       )}
       <div className="mt-4 flex gap-2">
         <Button onClick={generar} disabled={cargando} variant="outline">{cargando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{expediente ? 'Regenerar' : 'Generar expediente'}</Button>
-        {expediente && <Button onClick={() => expedientePDF({ cliente: sesion.cliente, expediente, reglas, transcripcion: sesion.transcripcion })}><Download className="mr-2 h-4 w-4" />Descargar PDF</Button>}
+        {expediente && <Button onClick={() => expedientePDF(datosPDF)}><Download className="mr-2 h-4 w-4" />Descargar PDF</Button>}
       </div>
+      {expediente && <EnviarArquitecto sesionId={sesion.id} crearPDF={() => expedientePDF({ ...datosPDF, descargar: false })} />}
     </div>
   );
 }

@@ -28,7 +28,7 @@ function writer() {
   return { doc, text, row, rule, cover, space: (h) => { y += h; } };
 }
 
-export function propuestaPDF({ cliente, parrafo, calc, plazo, vigencia, diferir, condiciones }) {
+export function propuestaPDF({ cliente, parrafo, calc, plazo, vigencia, diferir, condiciones, catalogo }) {
   const w = writer();
   w.cover('Propuesta Alestra', `${cliente || 'Cliente'} · ${new Date().toLocaleDateString('es-MX', { dateStyle: 'long' })}`);
   w.text('Lo que nos compartió', { size: 15, bold: true, gap: 3 });
@@ -50,10 +50,11 @@ export function propuestaPDF({ cliente, parrafo, calc, plazo, vigencia, diferir,
   w.space(3);
   w.text(`Vigencia de la propuesta: hasta el ${vigencia} (30 días naturales).`, { size: 10, bold: true });
   w.text('Precios verificados contra catálogo.', { size: 9, color: [21, 128, 61] });
+  if (catalogo) w.text(`Catálogo ${catalogo.version} · actualizado el ${new Date(catalogo.fecha).toLocaleDateString('es-MX', { dateStyle: 'long' })} · cotizado el ${new Date().toLocaleDateString('es-MX', { dateStyle: 'long' })}`, { size: 8, color: [100, 116, 139] });
   w.doc.save(`Propuesta-Alestra-${(cliente || 'cliente').replace(/\s+/g, '-')}.pdf`);
 }
 
-export function expedientePDF({ cliente, expediente, reglas, transcripcion }) {
+export function expedientePDF({ cliente, expediente, reglas, transcripcion, descargar = true }) {
   const w = writer();
   w.cover('Expediente para arquitecto', `${cliente || 'Cliente'} · ${new Date().toLocaleDateString('es-MX', { dateStyle: 'long' })}`);
   w.text('Resumen del cliente', { size: 14, bold: true }); w.text(expediente.resumen, { size: 10, gap: 5 });
@@ -64,5 +65,6 @@ export function expedientePDF({ cliente, expediente, reglas, transcripcion }) {
   w.text('Preguntas técnicas pendientes', { size: 14, bold: true });
   expediente.preguntas_tecnicas.forEach((s) => w.text(`• ${s}`, { size: 10, gap: 1 })); w.space(4);
   w.text('Transcripción', { size: 14, bold: true }); w.text(transcripcion, { size: 9 });
-  w.doc.save(`Expediente-${(cliente || 'cliente').replace(/\s+/g, '-')}.pdf`);
+  if (descargar) w.doc.save(`Expediente-${(cliente || 'cliente').replace(/\s+/g, '-')}.pdf`);
+  return w.doc;
 }

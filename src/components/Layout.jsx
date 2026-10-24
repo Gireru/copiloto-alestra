@@ -1,8 +1,9 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Radio, FileText, BarChart3 } from 'lucide-react';
+import { Radio, FileText, BarChart3, History } from 'lucide-react';
 
 const links = [
   { to: '/', label: 'Reunión en vivo', icon: Radio },
+  { to: '/sesiones', label: 'Mis sesiones', icon: History },
   { to: '/propuesta', label: 'Propuesta', icon: FileText },
   { to: '/evaluacion', label: 'Evaluación', icon: BarChart3 }
 ];

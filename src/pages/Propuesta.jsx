@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Download, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
-import { useCatalog } from '@/lib/catalog';
+import { useCatalog, versionCatalogo } from '@/lib/catalog';
 import { calcular, cantidadInicial, faltantes, recomendados, verificarPrecios } from '@/lib/quote';
 import { propuestaPDF } from '@/lib/pdf';
 import Panel from '@/components/meeting/Panel';
@@ -44,12 +44,13 @@ export default function Propuesta() {
     const malos = verificarPrecios(calc.filas, fresco);
     if (malos.length) { setEstado({ error: `Precios no coinciden con el catálogo: ${malos.map((m) => m.sku).join(', ')}` }); return; }
     setEstado({ verificado: true, cargando: true });
-    const { data } = await base44.functions.invoke('redactarNecesidad', { transcripcion: sesion.transcripcion, cliente: sesion.cliente });
+    const parrafo = sesion.resumen_cliente || (await base44.functions.invoke('redactarNecesidad', { transcripcion: sesion.transcripcion, cliente: sesion.cliente })).data.parrafo;
     const vig = vigenciaFecha();
-    propuestaPDF({ cliente: sesion.cliente, parrafo: data.parrafo, calc, plazo, diferir, condiciones: cat.condiciones, vigencia: vig.toLocaleDateString('es-MX', { dateStyle: 'long' }) });
+    const cv = versionCatalogo(fresco);
+    propuestaPDF({ cliente: sesion.cliente, parrafo, calc, plazo, diferir, condiciones: cat.condiciones, vigencia: vig.toLocaleDateString('es-MX', { dateStyle: 'long' }), catalogo: cv });
     await base44.entities.Propuesta.create({
       sesion: sesion.id, lineas: calc.filas, plazo_meses: plazo, subtotal_mensual: calc.subtotal, descuentos: calc.descuentos, iva: calc.iva,
-      total_mensual: calc.totalMensual, cargos_unicos: calc.unicos, requiere_autorizacion: calc.requiereAutorizacion, vigencia: vig.toISOString().slice(0, 10), expediente_arquitecto: expediente
+      total_mensual: calc.totalMensual, cargos_unicos: calc.unicos, requiere_autorizacion: calc.requiereAutorizacion, vigencia: vig.toISOString().slice(0, 10), expediente_arquitecto: expediente, catalogo_version: cv.version, catalogo_fecha: cv.fecha
     });
     setEstado({ verificado: true });
   };

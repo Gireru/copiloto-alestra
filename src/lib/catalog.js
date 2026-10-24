@@ -15,7 +15,15 @@ export function useCatalog() {
   });
 }
 
-export async function analizarTexto(texto) {
-  const res = await base44.functions.invoke('copilotAnalyze', { texto });
+export async function analizarTexto(texto, extra = {}) {
+  const res = await base44.functions.invoke('copilotAnalyze', { texto, ...extra });
   return res.data;
+}
+
+// Versión del catálogo: fecha del último cambio + huella de SKUs y precios.
+export function versionCatalogo(productos) {
+  const fecha = productos.reduce((m, p) => (p.updated_date > m ? p.updated_date : m), '');
+  const s = productos.map((p) => `${p.sku}:${p.precio_mensual_mxn}:${p.cargo_unico_mxn}`).sort().join('|');
+  let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return { version: `v${h.toString(36).toUpperCase().slice(0, 6)}`, fecha };
 }
