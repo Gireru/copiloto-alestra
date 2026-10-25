@@ -10,6 +10,8 @@ import ProductosViz from '@/components/viz/ProductosViz';
 import ReglasViz from '@/components/viz/ReglasViz';
 import DatosChecklistViz from '@/components/viz/DatosChecklistViz';
 import ResumenFinal from '@/components/viz/ResumenFinal';
+import TelemetriaViz from '@/components/viz/TelemetriaViz';
+import JsonViz from '@/components/viz/JsonViz';
 
 export default function Visualizador() {
   const { data: cat } = useCatalog();
@@ -51,6 +53,7 @@ export default function Visualizador() {
             {v.error && <p className="mt-3 text-sm text-destructive">Error: {v.error}</p>}
           </Glass>
           {res && etapa >= 7 && <ResumenFinal res={res} />}
+          {res && etapa >= 2 && <div className="grid gap-5 lg:grid-cols-2"><TelemetriaViz res={res} texto={v.texto} /><JsonViz res={res} /></div>}
           <div className="grid gap-5 lg:grid-cols-[1fr_1.3fr]">
             <TypewriterPanel texto={v.texto} res={etapa >= 2 ? res : null} />
             <div className="space-y-4">
