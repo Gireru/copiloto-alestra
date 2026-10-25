@@ -108,7 +108,7 @@ export default async function (req: Request): Promise<Response> {
     const productos_candidatos = (out.productos_candidatos || []).filter((x) => { const ok = !!productosMap[x?.sku]; if (!ok) bloqueadas++; return ok; }).filter((c) => !desc.has(c.sku));
     const skus = productos_candidatos.map((c) => c.sku);
     const preguntas_siguientes = skus.flatMap((s) => (productosMap[s].preguntas_clave || []).map((pregunta) => ({ pregunta, sku_fuente: s })))
-      .filter((p) => !hechas.includes(p.pregunta)).slice(0, 3);
+      .filter((p, i, arr) => !hechas.includes(p.pregunta) && arr.findIndex((x) => x.pregunta === p.pregunta) === i).slice(0, 3);
     let pregunta_cliente = out.pregunta_del_cliente?.texto && out.pregunta_del_cliente?.respuesta ? out.pregunta_del_cliente : null;
     if (pregunta_cliente && !pregunta_cliente.respuesta.startsWith('No está en el catálogo') && !productosMap[pregunta_cliente.sku_fuente]) { bloqueadas++; pregunta_cliente = null; }
     let respuestas_sugeridas = (out.respuestas_sugeridas || []).filter((r) => {

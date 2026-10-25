@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Radio, FileText, BarChart3, History, Sparkles, Video, Mail } from 'lucide-react';
+import { Radio, FileText, BarChart3, History, Sparkles, Video, Mail, BookOpen } from 'lucide-react';
 import TemaToggle from '@/components/TemaToggle';
 
 const links = [
@@ -9,7 +9,8 @@ const links = [
   { to: '/sesiones', label: 'Mis sesiones', icon: History },
   { to: '/propuesta', label: 'Propuesta', icon: FileText },
   { to: '/evaluacion', label: 'Evaluación', icon: BarChart3 },
-  { to: '/visualizador', label: 'Visualizador IA', icon: Sparkles }
+  { to: '/visualizador', label: 'Visualizador IA', icon: Sparkles },
+  { to: '/criterios', label: 'Criterios', icon: BookOpen }
 ];
 
 export default function Layout() {
