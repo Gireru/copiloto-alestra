@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
-import { HardDrive, Chrome, Smartphone, Plug, Lock } from 'lucide-react';
+import { HardDrive, Chrome, Smartphone, Plug, Lock, Download } from 'lucide-react';
+
+const EXT_URL = 'https://base44.app/api/apps/6a95f5fd0e9d584f30962913/files/mp/public/6a95f5fd0e9d584f30962913/f9c33051a_copiloto-alestra-conector.zip';
 
 const ITEMS = [
   { icon: HardDrive, t: 'Funciona en local', d: 'Puede operar dentro de tu infraestructura, sin depender de servidores externos.' },
@@ -21,6 +23,7 @@ export default function Capacidades() {
           </motion.div>
         ))}
       </div>
+      <a href={EXT_URL} download className="btn-gradient inline-flex items-center gap-2 px-5 py-3"><Download className="h-5 w-5" />Descargar extensión para Chrome</a>
       <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
         className="bg-night flex flex-col items-start gap-4 rounded-2xl p-6 md:flex-row md:items-center md:p-8">
         <motion.span animate={{ scale: [1, 1.08, 1] }} transition={{ repeat: Infinity, duration: 2.4 }}
