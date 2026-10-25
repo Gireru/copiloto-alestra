@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { HardDrive, Chrome, Smartphone, Plug, Lock, Download } from 'lucide-react';
+import { HardDrive, Chrome, Smartphone, Plug, Lock, Download, Coins } from 'lucide-react';
 
 const EXT_URL = 'https://base44.app/api/apps/6a95f5fd0e9d584f30962913/files/mp/public/6a95f5fd0e9d584f30962913/f9c33051a_copiloto-alestra-conector.zip';
 
@@ -31,6 +31,11 @@ export default function Capacidades() {
         <div><p className="text-xl font-semibold">La seguridad de la información es nuestra prioridad absoluta</p>
           <p className="mt-1 text-white/75">Los datos de tus clientes se protegen en cada paso: captura, análisis, propuesta y envío.</p></div>
       </motion.div>
+      <div className="flex gap-4 rounded-2xl border bg-card p-5">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-success/10 text-success"><Coins className="h-5 w-5" /></span>
+        <div><p className="font-semibold">Costo y adaptabilidad: mínimos</p>
+          <p className="text-sm text-muted-foreground">Solo se necesita una cuenta de Claude y ser colaborador de Alestra. La plataforma está hecha 100% en Claude con el modelo Haiku 5.5, a $0.10 USD por millón de tokens de entrada.</p></div>
+      </div>
     </section>
   );
 }
