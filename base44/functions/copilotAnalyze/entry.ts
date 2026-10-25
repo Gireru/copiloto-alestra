@@ -64,8 +64,8 @@ function limpiarDatos(raw, texto, empleados) {
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await base44.auth.me().catch(() => null);
+
     const { texto, descartados, ya_preguntado, empleados, sesion_id, industria } = await req.json();
     if (!texto || typeof texto !== 'string' || !texto.trim()) return Response.json({ error: 'Falta texto' }, { status: 400 });
     const desc = new Set(Array.isArray(descartados) ? descartados.slice(0, 50).map(String) : []);

@@ -4,8 +4,8 @@ import { cotizar, completarRequisitos, versionCatalogo, PLAZO_PCT } from '../../
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await base44.auth.me().catch(() => null);
+
     const body = await req.json();
     const plazo = Number(body.plazo_meses);
     if (!(plazo in PLAZO_PCT)) return Response.json({ error: 'El plazo debe ser 12, 24 o 36 meses.' }, { status: 400 });

@@ -3,8 +3,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await base44.auth.me().catch(() => null);
+
     const { sesion_id, para, pdf_base64 } = await req.json();
     const email = String(para || '').trim().toLowerCase();
     if (!sesion_id || !email || typeof pdf_base64 !== 'string') return Response.json({ error: 'Faltan datos' }, { status: 400 });
@@ -18,7 +18,7 @@ export default async function (req: Request): Promise<Response> {
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: email,
       subject: `Expediente técnico: ${cliente}`,
-      body: `<p>Hola,</p><p>${user.full_name || user.email} te envía el expediente técnico de <b>${cliente}</b> para su revisión. Encontrarás el PDF adjunto con el resumen, las reglas de escalamiento disparadas, lo que ya se preguntó y las preguntas técnicas pendientes.</p><p>Copiloto Alestra</p>`,
+      body: `<p>Hola,</p><p>${user?.full_name || user?.email || 'Un vendedor de Alestra'} te envía el expediente técnico de <b>${cliente}</b> para su revisión. Encontrarás el PDF adjunto con el resumen, las reglas de escalamiento disparadas, lo que ya se preguntó y las preguntas técnicas pendientes.</p><p>Copiloto Alestra</p>`,
       attachments: [{ filename: `Expediente-${cliente.replace(/[^\w-]+/g, '-')}.pdf`, content: pdf_base64 }]
     });
     return Response.json({ ok: true });

@@ -3,8 +3,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await base44.auth.me().catch(() => null);
+
     const { transcripcion, cliente, reglas, datos, preguntas_hechas, productos } = await req.json();
     if (!transcripcion || typeof transcripcion !== 'string') return Response.json({ error: 'Falta transcripción' }, { status: 400 });
     const prompt = `Eres el copiloto de un vendedor de Alestra. Prepara un expediente breve para el arquitecto de soluciones, en español de México, para que NO vuelva a preguntarle al cliente lo que ya se preguntó. No inventes datos ni precios; usa solo lo de abajo.
