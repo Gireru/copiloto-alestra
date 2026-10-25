@@ -1,62 +1,97 @@
-# Base44 Project
+# Alestra Copilot
 
-Use this repository to run and edit the app locally, then publish changes back through Base44.
+**Una nueva forma de vender.** Alestra Copilot es un copiloto comercial que acompaña al vendedor en vivo durante cada llamada: escucha al cliente, guía el levantamiento, clasifica el requerimiento y genera la cotización en PDF antes de colgar.
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+> *"Quien ahorra el tiempo del cliente, gana su lealtad."*
+> De 3 semanas a minutos. Respuestas inmediatas, cierres inmediatos.
 
-## Prerequisites
+---
 
-1. Clone the repository using the project's Git URL.
-2. Navigate to the project directory.
-3. Install dependencies: `npm install`.
-4. Install the Base44 CLI: `npm install -g base44@latest`.
-5. Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) — the local Base44 backend runs on it.
+## El problema
 
-Run `base44 --help` (or see the [CLI reference](https://docs.base44.com/developers/references/cli/commands/introduction)) for the full command surface.
+Hoy, el cliente explica lo mismo una y otra vez y espera semanas para recibir una propuesta. Muchas veces ni siquiera sabe con precisión qué necesita, lo que vuelve el proceso lento, ciego y desgastante.
 
-## Run Locally
+| Situación actual | |
+|---|---|
+| **3 sesiones** | hasta tener el requerimiento completo |
+| **3 semanas** | como máximo para enviar la propuesta económica |
+| **Casi siempre** | entra un arquitecto al levantamiento inicial |
 
-Three commands, from the project root:
+### Diagnóstico: el conocimiento existe, pero no llega a la llamada
+
+- **No sabe qué preguntar:** el levantamiento queda incompleto y se convoca a otra junta técnica.
+- **Falta de certeza en vivo:** no se puede dar una recomendación contundente ni cotizar en tiempo real.
+- **Llama al arquitecto:** el cliente tiene que repetir su historia desde cero.
+
+Alestra Copilot resuelve esto poniendo todo el catálogo y el criterio técnico en la pantalla del vendedor.
+
+---
+
+## Cómo funciona: de la voz a la cotización
+
+| Paso | Qué hace |
+|---|---|
+| **01 · Escucha en vivo** | Transcribe al cliente en tiempo real y detecta requerimientos o incidentes críticos al instante. |
+| **02 · Guía preguntas** | Sugiere qué preguntar para completar el levantamiento técnico sin omitir datos esenciales. |
+| **03 · Clasifica** | Identifica si el caso es estándar, mixto o a la medida, siguiendo reglas de negocio definidas en código. |
+| **04 · Cotiza en PDF** | Genera una propuesta formal con precios validados del catálogo antes de terminar la llamada. |
+
+### Funcionalidades de la aplicación
+
+- Reunión en vivo con grabación y transcripción de audio.
+- Videollamada con panel del copiloto: preguntas clave y productos recomendados.
+- Animación de "match perfecto" al completar el levantamiento.
+- Bandeja de correos de clientes con acceso directo a videollamada.
+- Subida de audio con transcripción y generación de cotización en PDF.
+- Motor de propuestas comerciales y análisis de conversación.
+- Visualizador IA del flujo de datos.
+
+---
+
+## Despliegue inmediato
+
+Alestra podría usarlo con su equipo mañana, con cero fricción:
+
+- **Usa lo que ya existe:** catálogo, paquetes, tarifas y reglas de escalamiento actuales, sin sustituir infraestructura.
+- **Se alimenta continuamente:** fácil de actualizar con nuevos servicios o políticas comerciales sin reentrenar modelos.
+- **Ya lo saben vender:** es un agente de conocimiento interno idéntico al que Alestra ofrece a sus propios clientes.
+
+**Piloto propuesto:** 2 semanas con un equipo comercial en Centro Sperto, midiendo velocidad de cierre y precisión.
+
+---
+
+## Impacto
+
+| Indicador operativo | Antes (hoy) | Con Alestra Copilot | Impacto |
+|---|---|---|---|
+| Sesiones de levantamiento | 3 reuniones | 1 sola reunión | Cero juntas redundantes para el cliente |
+| Tiempo hasta la propuesta | Hasta 3 semanas | Segundos / minutos | Cotización en la misma llamada |
+| Participación de arquitectos | Casi siempre | Solo en casos a la medida | Ingeniería enfocada en proyectos de alto valor |
+
+- **100 %** precios validados
+- **0** SKUs inventados
+- **−95 %** tiempo de respuesta
+
+---
+
+## Tecnología
+
+- React 18 + Vite
+- Tailwind CSS y componentes Radix UI
+- TanStack Query, React Router
+- Framer Motion y canvas-confetti para animaciones
+- jsPDF y html2canvas para la generación de cotizaciones
+
+## Desarrollo local
 
 ```bash
-base44 login   # one-time per machine
-base44 link    # one-time per clone
-base44 dev     # local backend + frontend together
+npm install     # instalar dependencias
+npm run dev     # servidor de desarrollo
+npm run build   # build de producción
+npm run lint    # revisión de código
 ```
 
-Open the frontend URL that `base44 dev` prints (typically `http://localhost:5173`).
+## Estructura
 
-Notes:
-
-- **Every fresh clone needs `base44 link`.** It writes `base44/.app.jsonc` (the app-id pointer), which is deliberately gitignored. Your app id is in the Builder URL (`app.base44.com/apps/<id>/...`); `base44 link --help` shows the non-interactive flags.
-- **`base44 dev` runs the frontend for you** (via `site.serveCommand` in this repo's `base44/config.jsonc`) — never run `npm run dev` yourself: alone it serves a UI with no backend behind it (`[base44] Proxy not enabled`, every `/api` call fails), and alongside `base44 dev` the second Vite silently takes the next port and you end up looking at the wrong one.
-- **The app must be published at least once for the UI to load under `base44 dev`.** The frontend boots by fetching app settings from the hosted app; before the first publish that fails and every page redirects to login. The local API works regardless.
-- Entities, functions, and auth run locally — entity data is **in-memory only**, wiped when `base44 dev` restarts. Everything else (Core integrations, OAuth login) is forwarded to your deployed app. Full breakdown: [Local development overview](https://docs.base44.com/developers/backend/overview/local-dev/local-development-overview).
-
-## Frontend Only, Hosted Backend
-
-To work on just the frontend against your app's live hosted backend:
-
-```bash
-base44 dev --remote
-```
-
-⚠️ In this mode writes go to your app's **production data** — plain `base44 dev` keeps everything local.
-
-## Publish Your Changes
-
-After pushing your changes to git, open the Base44 dashboard and publish the app:
-
-```bash
-base44 dashboard open
-```
-
-This repo syncs to Base44 through git, so publish from the dashboard rather than `base44 deploy` — a CLI deploy ships your local tree directly, bypassing the sync, and the deployed state silently diverges from the repo.
-
-## Docs & Support
-
-GitHub integration: [https://docs.base44.com/developers/app-code/local-development/github](https://docs.base44.com/developers/app-code/local-development/github)
-
-Local development: [https://docs.base44.com/developers/backend/overview/local-dev/local-development-overview](https://docs.base44.com/developers/backend/overview/local-dev/local-development-overview)
-
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+- `src/` — código fuente del frontend (páginas, componentes y cliente de API).
+- `public/brand/` — logotipos e íconos de la marca.
