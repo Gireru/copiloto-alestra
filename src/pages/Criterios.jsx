@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import CriterioBloque from '@/components/criterios/CriterioBloque';
+import Capacidades from '@/components/criterios/Capacidades';
 import { PRINCIPIOS, BLOQUES } from '@/lib/criterios';
 
 export default function Criterios() {
@@ -23,6 +24,7 @@ export default function Criterios() {
         ))}
       </div>
       {BLOQUES.map((b, i) => <CriterioBloque key={b.titulo} {...b} i={i} />)}
+      <Capacidades />
     </div>
   );
 }
