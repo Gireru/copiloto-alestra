@@ -20,20 +20,6 @@
     "nombre"
   ],
   "rls": {
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "user"
-          }
-        }
-      ]
-    },
     "create": {
       "user_condition": {
         "role": "admin"
